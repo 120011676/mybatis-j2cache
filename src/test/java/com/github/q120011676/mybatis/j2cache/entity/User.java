@@ -1,9 +1,11 @@
 package com.github.q120011676.mybatis.j2cache.entity;
 
+import java.io.Serializable;
+
 /**
  * Created by say on 3/22/16.
  */
-public class User {
+public class User implements Serializable {
     //实体类的属性和表的字段名称一一对应
     private int id;
     private String name;

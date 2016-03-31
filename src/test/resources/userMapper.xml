@@ -21,4 +21,7 @@
     <update id="upUser" parameterType="com.github.q120011676.mybatis.j2cache.entity.User">
         update users set name = #{name} where id = #{id}
     </update>
+    <insert id="add" parameterType="com.github.q120011676.mybatis.j2cache.entity.User">
+        insert users(name,username,password) value(#{name},#{name},'test')
+    </insert>
 </mapper>

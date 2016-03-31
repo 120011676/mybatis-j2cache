@@ -5,6 +5,7 @@ import net.oschina.j2cache.J2Cache;
 import org.apache.ibatis.cache.Cache;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -42,7 +43,8 @@ public class J2cacheCache implements Cache {
 
     @Override
     public Object getObject(Object o) {
-        return this.cache.get(this.id, o).getValue();
+        Object obj = this.cache.get(this.id, o).getValue();
+        return obj;
     }
 
     @Override
@@ -55,7 +57,13 @@ public class J2cacheCache implements Cache {
 
     @Override
     public void clear() {
-        this.cache.clear(this.id);
+        this.readWriteLock.writeLock().lock();
+        List list = this.cache.keys(this.getId());
+        if (list != null && list.size() > 0) {
+            this.cache.clear(this.id);
+            this.map.clear();
+        }
+        this.readWriteLock.writeLock().unlock();
     }
 
     @Override
