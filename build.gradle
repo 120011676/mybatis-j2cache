@@ -39,7 +39,7 @@ apply plugin: 'maven-publish'
 apply plugin: 'signing'
 
 group = 'com.github.120011676'
-version = '1.0.2'
+version = '1.0.3'
 description = 'mybatis j2cache'
 sourceCompatibility = 1.6
 targetCompatibility = 1.6

@@ -1,12 +1,13 @@
 package com.github.q120011676.mybatis.j2cache;
 
 import net.oschina.j2cache.CacheChannel;
+import net.oschina.j2cache.CacheException;
 import net.oschina.j2cache.J2Cache;
 import org.apache.ibatis.cache.Cache;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -17,7 +18,7 @@ public class J2cacheCache implements Cache {
     private final ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
     private CacheChannel cache = J2Cache.getChannel();
     private String id;
-    private Map<Object, Object> map = new HashMap<Object, Object>();
+    private static final Logger LOGGER = LoggerFactory.getLogger(J2cacheCache.class);
 
     public J2cacheCache(String id) {
         if (id == null) {
@@ -38,7 +39,6 @@ public class J2cacheCache implements Cache {
     @Override
     public void putObject(Object o, Object o1) {
         this.cache.set(this.id, o, o1);
-        this.map.put(o, null);
     }
 
     @Override
@@ -50,25 +50,32 @@ public class J2cacheCache implements Cache {
     @Override
     public Object removeObject(Object o) {
         Object obj = this.cache.get(this.id, o).getValue();
-        this.cache.evict(this.id, o);
-        this.map.remove(o);
+        if (obj != null) {
+            try {
+                this.cache.evict(this.id, o);
+            } catch (CacheException e) {
+                LOGGER.warn(e.getLocalizedMessage());
+            }
+        }
         return obj;
     }
 
     @Override
     public void clear() {
-        this.readWriteLock.writeLock().lock();
-        List list = this.cache.keys(this.getId());
-        if (list != null && list.size() > 0) {
-            this.cache.clear(this.id);
-            this.map.clear();
+        List keys = this.cache.keys(this.getId());
+        if (keys != null && keys.size() > 0) {
+            try {
+                this.cache.clear(this.getId());
+            } catch (CacheException e) {
+                LOGGER.warn(e.getLocalizedMessage());
+            }
         }
-        this.readWriteLock.writeLock().unlock();
     }
 
     @Override
     public int getSize() {
-        return this.map.size();
+        List keys = this.cache.keys(this.getId());
+        return keys != null ? keys.size() : 0;
     }
 
     @Override
